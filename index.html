@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grace Supplier Performance Management</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">G</div>
+        <div>
+          <div class="brand-name">Grace</div>
+          <div class="brand-subtitle">SUPPLIER PERFORMANCE MANAGEMENT</div>
+        </div>
+      </div>
+      <nav class="main-nav" aria-label="Primary">
+        <button>Leadership</button>
+        <button>New Contract</button>
+        <button>Contract Assistant</button>
+        <button class="active">Buyer View</button>
+      </nav>
+      <div class="top-actions">
+        <button class="icon-button" id="notificationButton" aria-label="Notifications">
+          <span class="notification-dot">3</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+        </button>
+        <div class="avatar">JD</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="portfolioHero">
+        <button class="back-button hidden" id="backButton" aria-label="Back to portfolio">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
+        </button>
+        <div>
+          <h1 id="pageTitle">Supplier Portfolio</h1>
+          <p id="pageSubtitle">View and manage all supplier contracts</p>
+        </div>
+        <button class="export-button hidden" id="exportButton">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>
+          Export Report
+        </button>
+      </section>
+
+      <section id="portfolioView" class="content-shell">
+        <div class="panel table-panel">
+          <div class="tabs" role="tablist" aria-label="Contract tables">
+            <button class="tab active" data-tab="renewals">Renewals & New Contracts</button>
+            <button class="tab" data-tab="live">Live Contracts</button>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead id="portfolioHead"></thead>
+              <tbody id="portfolioBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="detailView" class="content-shell detail-view hidden">
+        <div class="panel contract-selection">
+          <div class="panel-header">
+            <h2>Contract Selection</h2>
+            <span>5 contracts</span>
+          </div>
+          <select id="contractSelect" aria-label="Contract selection"></select>
+          <div class="stage-grid">
+            <button class="stage-card selected" id="negotiationStage">
+              <span class="stage-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+              </span>
+              <span><strong>Negotiation</strong><small>Contract terms being defined</small></span>
+            </button>
+            <button class="stage-card" id="executedStage">
+              <span class="stage-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+              </span>
+              <span><strong>Executed</strong><small>Contract active &amp; monitored</small></span>
+            </button>
+          </div>
+          <button class="primary wide" id="moveStageButton">Move to Executed Stage</button>
+        </div>
+
+        <div class="section-heading">
+          <h2>Performance Overview</h2>
+          <p>Comprehensive metrics and risk analysis</p>
+        </div>
+
+        <div class="panel recommendation-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Recommendations</h2>
+              <p>Based on performance data and breach history</p>
+            </div>
+            <button class="icon-button plain" aria-label="Collapse recommendations">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+          </div>
+          <div class="policy-card">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path><circle cx="12" cy="12" r="10"></circle></svg>
+            <div>
+              <strong>3-Strike Policy Active</strong>
+              <span id="policyDate">Policy implemented on January 13, 2026</span>
+              <ul>
+                <li>Strike 1: Written warning, no penalty</li>
+                <li>Strike 2: 1-3% penalty applied</li>
+                <li>Strike 3: 5% penalty applied</li>
+              </ul>
+            </div>
+            <div class="policy-status"><span>Status:</span><b>Active</b></div>
+          </div>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card teal">
+            <div class="metric-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M3 10h18"></path></svg></div>
+            <div>
+              <span>Payment Terms</span>
+              <strong>100 days</strong>
+              <small>Regional target: <b>95 days</b></small>
+              <small>Status: <mark>Favorable</mark></small>
+              <button id="clauseButton">See the Clauses +</button>
+            </div>
+          </article>
+          <article class="metric-card yellow">
+            <div class="metric-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg></div>
+            <div>
+              <span>Grace Score</span>
+              <strong id="detailScore">--</strong>
+              <small>Tier: <b id="detailTier">Silver</b></small>
+              <small>Rating: <b>Contract quality</b></small>
+              <button id="clauseButtonTwo">See the Clauses +</button>
+            </div>
+          </article>
+          <article class="metric-card green">
+            <div class="metric-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg></div>
+            <div>
+              <span>Recovery Opportunity</span>
+              <strong id="detailRecovery">--</strong>
+              <small>Potential savings: <b id="detailRecoveryRisk">High</b></small>
+              <small>Source: <b>Contract data</b></small>
+            </div>
+          </article>
+          <article class="metric-card orange">
+            <div class="metric-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></div>
+            <div>
+              <span>Active Alerts</span>
+              <strong id="detailAlerts">--</strong>
+              <div class="chips" id="detailAlertChips"></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="panel chart-panel">
+          <div class="panel-title">
+            <h2>Performance Trend Analysis</h2>
+            <p>Historical OTIF performance over time</p>
+          </div>
+          <div class="trend-summary">
+            <div><span>Recent avg (last 4 quarters)</span><strong id="recentAvg">--</strong><small>2025 performance</small></div>
+            <div><span>Minimum target</span><strong id="minTarget">95.0%</strong><small>Contract benchmark</small></div>
+            <div><span>Performance trend</span><strong id="trendValue">--</strong><small>Improving</small></div>
+          </div>
+          <div class="line-chart" id="lineChart" aria-label="OTIF line chart"></div>
+        </div>
+
+        <div class="panel details-table-panel">
+          <div class="panel-title">
+            <h2>Detailed Performance Metrics</h2>
+            <p>All key indicators and risk analysis data</p>
+          </div>
+          <table class="details-table">
+            <thead>
+              <tr><th>Metric</th><th>Current Value</th><th>Target/Benchmark</th><th>Status</th><th>Notes</th></tr>
+            </thead>
+            <tbody id="metricsBody"></tbody>
+          </table>
+        </div>
+
+        <div class="panel bar-panel">
+          <div class="panel-title">
+            <h2>Supplier OTIF Performance</h2>
+            <p>On-Time In-Full delivery trends over 4 reported quarters</p>
+          </div>
+          <div class="bar-chart" id="barChart" aria-label="Supplier OTIF bar chart"></div>
+        </div>
+
+        <div class="panel incidents-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Past Incidents of Non-Compliance</h2>
+              <p>Historical record of supplier performance issues</p>
+            </div>
+            <span id="incidentTotal">0 total</span>
+          </div>
+          <table class="details-table compact">
+            <thead><tr><th>Date</th><th>Type</th><th>Severity</th><th>Description</th><th>Financial Impact</th></tr></thead>
+            <tbody id="incidentsBody"></tbody>
+          </table>
+        </div>
+
+        <div class="panel claims-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Potential Claims</h2>
+              <p>Incidents that may be eligible for claim under contract terms</p>
+            </div>
+            <span id="claimTotal">0 total</span>
+          </div>
+          <div class="recovery-box">
+            <span>Actual Recovery Value</span>
+            <small>Total Recovered (Since Jan 2026)</small>
+            <strong>EUR 0</strong>
+          </div>
+          <div class="strike-box"><span>Strikes applied:</span><b id="strikeApplied">0</b></div>
+          <div class="warning-box"><strong>Potential Unclaimed Value</strong><span id="unclaimedValue">Review required</span></div>
+          <table class="details-table compact">
+            <thead><tr><th>Date</th><th>Type</th><th>Est. Severity</th><th>Description</th><th>Claim</th><th>Status</th></tr></thead>
+            <tbody id="claimsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <aside class="notifications hidden" id="notificationsPanel">
+      <div class="notification-head"><h2>Notifications</h2><span>3 new</span></div>
+      <div id="notificationItems"></div>
+      <button>View All Notifications</button>
+    </aside>
+
+    <div class="overlay hidden" id="statusOverlay">
+      <div class="dialog status-dialog">
+        <h2>Confirm Status Change</h2>
+        <p>Are you sure you want to move this contract to Executed stage?</p>
+        <label>Execution Date</label>
+        <button class="date-input" id="dateInput"><span id="selectedDateText">Select date</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M3 10h18"></path></svg></button>
+        <div class="calendar hidden" id="calendar">
+        <div class="calendar-head"><button id="prevMonth">&lt;</button><strong id="monthLabel">May 2026</strong><button id="nextMonth">&gt;</button></div>
+          <div class="calendar-grid weekdays"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+          <div class="calendar-grid" id="calendarDays"></div>
+          <button class="today-button" id="todayButton">Today</button>
+        </div>
+        <div class="dialog-actions"><button id="cancelStatus">Cancel</button><button class="primary disabled" id="confirmStatus">Confirm</button></div>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="clauseOverlay">
+      <div class="dialog clause-dialog">
+        <div class="clause-head">
+          <div><h2>Clause Comparison</h2><p>Current vs AI-recommended clauses</p></div>
+          <button class="icon-button plain" id="closeClauses" aria-label="Close clause comparison"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+        </div>
+        <div class="clause-list" id="clauseList"></div>
+        <div class="clause-total"><span>Total Potential Savings:</span><strong id="clauseTotal">EUR 0</strong></div>
+      </div>
+    </div>
+
+    <button class="assistant-button" aria-label="Contract assistant">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v6"></path><path d="M18 15v6"></path><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="12" r="3"></circle><path d="M9 12h6"></path></svg>
+    </button>
+
+    <script src="app.js"></script>
+  </body>
+</html>
