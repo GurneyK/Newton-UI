@@ -210,7 +210,7 @@ function renderPortfolio() {
         <td><strong>${score(contract)}%</strong></td>
         <td>${alertCell(contract)}</td>
         <td><span class="status-pill ${statusClass(contract.status)}">${contract.status}</span></td>
-        <td><button class="recommendation-link" data-recommendation="${contract.id}">${recommendationFor(contract)} -></button></td>
+        <td><button class="recommendation-link" data-recommendation="${contract.id}">${recommendationFor(contract)}</button></td>
       </tr>
     `).join("");
   } else {
@@ -494,7 +494,7 @@ function monthlyOtif(contract) {
 function chartScale(values) {
   const rawMin = Math.min(...values, 95);
   const rawMax = Math.max(...values, 100);
-  const min = Math.max(50, Math.floor((rawMin - 3) / 5) * 5);
+  const min = Math.max(50, Math.floor((rawMin - 5) / 5) * 5);
   const max = Math.min(100, Math.ceil((rawMax + 1) / 5) * 5);
   const step = Math.max(5, Math.round((max - min) / 4 / 5) * 5);
   const ticks = [];
