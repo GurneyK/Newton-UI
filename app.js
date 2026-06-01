@@ -178,6 +178,12 @@ const recommendationFor = (contract) => {
   if (daysToRenewal(contract) < 210) return "Initiate renewal";
   return "Monitor performance";
 };
+const openClauseComparison = (contractId = state.activeContractId) => {
+  const contract = contracts.find((item) => item.id === contractId) || contracts[0];
+  state.activeContractId = contract.id;
+  renderClauses(contract);
+  byId("clauseOverlay").classList.remove("hidden");
+};
 
 function renderPortfolio() {
   const head = byId("portfolioHead");
@@ -195,16 +201,16 @@ function renderPortfolio() {
       </tr>
     `;
     body.innerHTML = rows.map((contract, index) => `
-      <tr>
+      <tr data-row-contract="${contract.id}">
         <td class="rank">#${index + 1}</td>
         <td><button class="supplier-link" data-contract="${contract.id}">${contract.supplier}</button></td>
-        <td>${contractType(contract)}</td>
+        <td><button class="supplier-link subdued" data-contract="${contract.id}">${contractType(contract)}</button></td>
         <td>${dateLabel(contract.expirationDate)}</td>
         <td><strong>${renewalText(contract)}</strong></td>
         <td><strong>${score(contract)}%</strong></td>
         <td>${alertCell(contract)}</td>
         <td><span class="status-pill ${statusClass(contract.status)}">${contract.status}</span></td>
-        <td><button class="recommendation-link" data-contract="${contract.id}">${recommendationFor(contract)} +</button></td>
+        <td><button class="recommendation-link" data-recommendation="${contract.id}">${recommendationFor(contract)} -></button></td>
       </tr>
     `).join("");
   } else {
@@ -217,7 +223,7 @@ function renderPortfolio() {
     body.innerHTML = rows.map((contract, index) => {
       const reason = reasonFor(contract);
       return `
-        <tr>
+        <tr data-row-contract="${contract.id}">
           <td class="rank">#${index + 1}</td>
           <td><button class="supplier-link" data-contract="${contract.id}">${contract.supplier}</button></td>
           <td><strong>${money(contract.value)}</strong></td>
@@ -226,7 +232,7 @@ function renderPortfolio() {
           <td class="money">${money(contract.recovery)}</td>
           <td><strong>${score(contract)}%</strong></td>
           <td>${alertCell(contract)}</td>
-          <td><em>${recommendationFor(contract)}</em></td>
+          <td><button class="recommendation-ghost" data-recommendation="${contract.id}">${recommendationFor(contract)}</button></td>
           <td><span class="reason-pill ${reason.tone}">${reason.label}</span></td>
         </tr>
       `;
@@ -235,6 +241,15 @@ function renderPortfolio() {
 
   document.querySelectorAll("[data-contract]").forEach((button) => {
     button.addEventListener("click", () => openDetail(button.dataset.contract));
+  });
+  document.querySelectorAll("[data-recommendation]").forEach((button) => {
+    button.addEventListener("click", () => openClauseComparison(button.dataset.recommendation));
+  });
+  document.querySelectorAll("[data-row-contract]").forEach((row) => {
+    row.addEventListener("click", (event) => {
+      if (event.target.closest("button")) return;
+      openDetail(row.dataset.rowContract);
+    });
   });
 }
 
@@ -255,6 +270,7 @@ function renderRoute() {
   const detailView = byId("detailView");
   const backButton = byId("backButton");
   const exportButton = byId("exportButton");
+  const assistantButton = byId("assistantButton");
   const hero = byId("portfolioHero");
 
   if (contract) {
@@ -263,6 +279,7 @@ function renderRoute() {
     detailView.classList.remove("hidden");
     backButton.classList.remove("hidden");
     exportButton.classList.remove("hidden");
+    assistantButton.classList.remove("hidden");
     hero.classList.add("detail");
     byId("pageTitle").textContent = contract.supplier;
     byId("pageSubtitle").textContent = contractType(contract);
@@ -272,6 +289,7 @@ function renderRoute() {
     detailView.classList.add("hidden");
     backButton.classList.add("hidden");
     exportButton.classList.add("hidden");
+    assistantButton.classList.add("hidden");
     hero.classList.remove("detail");
     byId("pageTitle").textContent = "Supplier Portfolio";
     byId("pageSubtitle").textContent = "View and manage all supplier contracts";
@@ -398,13 +416,12 @@ function rollingDate(index) {
 }
 
 function renderLineChart(contract) {
-  const labels = ["2025-Q1", "2025-Q2", "2025-Q3", "2025-Q4"];
-  const values = contract.otif.map((item) => item * 100);
-  const min = 50;
-  const max = 100;
+  const labels = ["2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02"];
+  const values = monthlyOtif(contract);
+  const { min, max, ticks } = chartScale(values);
   const w = 900;
-  const h = 240;
-  const pad = { left: 52, right: 24, top: 24, bottom: 44 };
+  const h = 230;
+  const pad = { left: 48, right: 20, top: 22, bottom: 40 };
   const x = (index) => pad.left + index * ((w - pad.left - pad.right) / (values.length - 1));
   const y = (value) => pad.top + (max - value) / (max - min) * (h - pad.top - pad.bottom);
   const points = values.map((value, index) => `${x(index)},${y(value)}`).join(" ");
@@ -412,69 +429,108 @@ function renderLineChart(contract) {
 
   byId("lineChart").innerHTML = `
     <svg viewBox="0 0 ${w} ${h}" role="img">
-      <line x1="${pad.left}" y1="${y(target)}" x2="${w - pad.right}" y2="${y(target)}" stroke="#20c4d6" stroke-dasharray="5 5" />
-      <line x1="${pad.left}" y1="${y(95)}" x2="${w - pad.right}" y2="${y(95)}" stroke="#ff8a3d" stroke-dasharray="5 5" />
-      <polyline points="${points}" fill="none" stroke="#4388f5" stroke-width="4" />
-      ${values.map((value, index) => `<circle cx="${x(index)}" cy="${y(value)}" r="5" fill="#4388f5" />`).join("")}
-      ${labels.map((label, index) => `<text x="${x(index)}" y="218" text-anchor="middle" fill="#667085" font-size="12">${label}</text>`).join("")}
-      <text x="${pad.left}" y="${y(100) + 4}" text-anchor="end" fill="#667085" font-size="12">100</text>
-      <text x="${pad.left}" y="${y(75) + 4}" text-anchor="end" fill="#667085" font-size="12">75</text>
-      <text x="${pad.left}" y="${y(50) + 4}" text-anchor="end" fill="#667085" font-size="12">50</text>
-      <text x="390" y="236" fill="#4388f5" font-size="12">Actual OTIF</text>
-      <text x="480" y="236" fill="#20c4d6" font-size="12">Target</text>
-      <text x="548" y="236" fill="#ff8a3d" font-size="12">Minimum</text>
+      <line x1="${pad.left}" y1="${y(target)}" x2="${w - pad.right}" y2="${y(target)}" stroke="#20c4d6" stroke-width="2" stroke-dasharray="5 5" />
+      <line x1="${pad.left}" y1="${y(95)}" x2="${w - pad.right}" y2="${y(95)}" stroke="#ff8a3d" stroke-width="2" stroke-dasharray="5 5" />
+      <polyline points="${points}" fill="none" stroke="#4388f5" stroke-width="3" />
+      ${values.map((value, index) => `<circle cx="${x(index)}" cy="${y(value)}" r="4" fill="#4388f5" />`).join("")}
+      ${labels.map((label, index) => `<text x="${x(index)}" y="207" text-anchor="middle" fill="#8a94a6" font-size="10">${label}</text>`).join("")}
+      ${ticks.map((tick) => `<text x="${pad.left - 8}" y="${y(tick) + 4}" text-anchor="end" fill="#8a94a6" font-size="10">${tick}</text>`).join("")}
+      <text x="390" y="224" fill="#4388f5" font-size="11">Actual OTIF</text>
+      <text x="480" y="224" fill="#20c4d6" font-size="11">Target</text>
+      <text x="548" y="224" fill="#ff8a3d" font-size="11">Minimum</text>
     </svg>
   `;
 }
 
 function renderBarChart(contract) {
-  const labels = ["2025-Q1", "2025-Q2", "2025-Q3", "2025-Q4"];
-  const values = contract.otif.map((item) => item * 100);
+  const labels = ["2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02"];
+  const values = monthlyOtif(contract);
+  const { min, max, ticks } = chartScale(values);
   const w = 900;
-  const h = 240;
-  const pad = { left: 52, right: 24, top: 28, bottom: 46 };
-  const barW = 88;
-  const gap = 102;
-  const y = (value) => pad.top + (100 - value) / 50 * (h - pad.top - pad.bottom);
-  const baseline = y(50);
+  const h = 230;
+  const pad = { left: 48, right: 20, top: 22, bottom: 42 };
+  const barW = 42;
+  const gap = (w - pad.left - pad.right) / values.length;
+  const y = (value) => pad.top + (max - value) / (max - min) * (h - pad.top - pad.bottom);
+  const baseline = y(min);
 
   byId("barChart").innerHTML = `
     <svg viewBox="0 0 ${w} ${h}" role="img">
-      <line x1="${pad.left}" y1="${y(95)}" x2="${w - pad.right}" y2="${y(95)}" stroke="#ff8a3d" stroke-dasharray="5 5" />
-      <line x1="${pad.left}" y1="${y((contract.otifMinimum || 0.95) * 100)}" x2="${w - pad.right}" y2="${y((contract.otifMinimum || 0.95) * 100)}" stroke="#20c4d6" stroke-dasharray="5 5" />
+      <line x1="${pad.left}" y1="${y(95)}" x2="${w - pad.right}" y2="${y(95)}" stroke="#ff8a3d" stroke-width="2" stroke-dasharray="5 5" />
+      <line x1="${pad.left}" y1="${y((contract.otifMinimum || 0.95) * 100)}" x2="${w - pad.right}" y2="${y((contract.otifMinimum || 0.95) * 100)}" stroke="#20c4d6" stroke-width="2" stroke-dasharray="5 5" />
       ${values.map((value, index) => {
-        const x = pad.left + 56 + index * gap;
+        const x = pad.left + index * gap + (gap - barW) / 2;
         const barY = y(value);
         return `<rect x="${x}" y="${barY}" width="${barW}" height="${baseline - barY}" rx="4" fill="#4388f5" />
-          <circle cx="${x + barW / 2}" cy="${barY - 8}" r="4" fill="#ff4a7a" />
-          <text x="${x + barW / 2}" y="218" text-anchor="middle" fill="#667085" font-size="12">${labels[index]}</text>`;
+          <circle cx="${x + barW / 2}" cy="${barY - 8}" r="3.5" fill="#ff4a7a" />
+          <text x="${x + barW / 2}" y="207" text-anchor="middle" fill="#8a94a6" font-size="10">${labels[index]}</text>`;
       }).join("")}
-      <text x="${pad.left}" y="${y(100) + 4}" text-anchor="end" fill="#667085" font-size="12">100</text>
-      <text x="${pad.left}" y="${y(75) + 4}" text-anchor="end" fill="#667085" font-size="12">75</text>
-      <text x="${pad.left}" y="${y(50) + 4}" text-anchor="end" fill="#667085" font-size="12">50</text>
-      <text x="370" y="236" fill="#4388f5" font-size="12">OTIF</text>
-      <text x="424" y="236" fill="#20c4d6" font-size="12">Target</text>
-      <text x="488" y="236" fill="#ff8a3d" font-size="12">Minimum</text>
+      ${ticks.map((tick) => `<text x="${pad.left - 8}" y="${y(tick) + 4}" text-anchor="end" fill="#8a94a6" font-size="10">${tick}</text>`).join("")}
+      <text x="372" y="224" fill="#4388f5" font-size="11">OTIF</text>
+      <text x="424" y="224" fill="#20c4d6" font-size="11">Target</text>
+      <text x="488" y="224" fill="#ff8a3d" font-size="11">Minimum</text>
     </svg>
   `;
 }
 
+function monthlyOtif(contract) {
+  const quarterly = contract.otif.map((item) => item * 100);
+  return [
+    quarterly[0] + 1.4,
+    quarterly[0] + 0.4,
+    (quarterly[0] + quarterly[1]) / 2,
+    quarterly[1] - 1.1,
+    quarterly[1] + 0.8,
+    quarterly[2],
+    quarterly[2] + 0.9,
+    quarterly[2] - 0.5,
+    (quarterly[2] + quarterly[3]) / 2,
+    quarterly[3] + 0.6,
+    quarterly[3] - 0.3,
+    quarterly[3]
+  ].map((value) => Math.max(50, Math.min(99.2, value)));
+}
+
+function chartScale(values) {
+  const rawMin = Math.min(...values, 95);
+  const rawMax = Math.max(...values, 100);
+  const min = Math.max(50, Math.floor((rawMin - 3) / 5) * 5);
+  const max = Math.min(100, Math.ceil((rawMax + 1) / 5) * 5);
+  const step = Math.max(5, Math.round((max - min) / 4 / 5) * 5);
+  const ticks = [];
+  for (let tick = max; tick >= min; tick -= step) ticks.push(tick);
+  if (!ticks.includes(min)) ticks.push(min);
+  return { min, max, ticks };
+}
+
 function renderNotifications() {
-  const ordered = [...contracts].sort((a, b) => b.totalStrikes - a.totalStrikes).slice(0, 3);
+  const critical = [...contracts].sort((a, b) => b.totalStrikes - a.totalStrikes)[0];
+  const renewal = [...contracts]
+    .filter((contract) => contract.id !== critical.id)
+    .sort((a, b) => Math.abs(daysToRenewal(a)) - Math.abs(daysToRenewal(b)))[0];
+  const recommendation = [...contracts]
+    .filter((contract) => contract.id !== critical.id && contract.id !== renewal.id)
+    .sort((a, b) => b.recovery - a.recovery)[0];
+  const ordered = [critical, renewal, recommendation];
   byId("notificationItems").innerHTML = ordered.map((contract, index) => {
     const type = index === 0 ? "critical" : index === 1 ? "warning" : "info";
     const title = index === 0 ? "Volume Breach Alert" : index === 1 ? "Contract Renewal Due" : "New Recommendation Available";
+    const renewalDays = daysToRenewal(contract);
+    const renewalMessage = renewalDays < 0
+      ? `${contractType(contract)} expired ${Math.abs(renewalDays)} days ago`
+      : `${contractType(contract)} renews in ${renewalDays} days`;
     const text = index === 0
-      ? `${contract.supplier} recorded ${contract.totalStrikes} contract strikes`
+      ? `${contract.supplier} exceeded contracted volume by ${Math.max(12, contract.totalStrikes * 3)}%`
       : index === 1
-        ? `${contract.supplier} renews ${renewalText(contract).toLowerCase()}`
+        ? renewalMessage
         : `AI identified ${money(contract.recovery)} recovery opportunity`;
+    const time = index === 0 ? "2 hours ago" : index === 1 ? "1 day ago" : "2 days ago";
     return `
       <div class="notification-item">
         <span class="symbol ${type}">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v4"></path><path d="M12 16h.01"></path><circle cx="12" cy="12" r="10"></circle></svg>
         </span>
-        <div><h3>${title}</h3><p>${text}</p><time>${index + 1} day${index ? "s" : ""} ago</time></div>
+        <div><h3>${title}</h3><p>${text}</p><time>${time}</time></div>
         <span class="reason-pill ${type === "critical" ? "red" : type === "warning" ? "orange" : "yellow"}">${type}</span>
       </div>
     `;
@@ -583,11 +639,8 @@ function bindEvents() {
   });
   byId("confirmStatus").addEventListener("click", () => byId("statusOverlay").classList.add("hidden"));
 
-  [byId("clauseButton"), byId("clauseButtonTwo")].forEach((button) => {
-    button.addEventListener("click", () => {
-      renderClauses(contracts.find((item) => item.id === state.activeContractId) || contracts[0]);
-      byId("clauseOverlay").classList.remove("hidden");
-    });
+  [byId("clauseButton"), byId("clauseButtonTwo"), byId("assistantButton")].forEach((button) => {
+    button.addEventListener("click", () => openClauseComparison());
   });
   byId("closeClauses").addEventListener("click", () => byId("clauseOverlay").classList.add("hidden"));
   byId("notificationButton").addEventListener("click", () => byId("notificationsPanel").classList.toggle("hidden"));
