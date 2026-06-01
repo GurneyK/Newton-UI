@@ -803,20 +803,20 @@ td .reason-pill {
 
 .line-chart,
 .bar-chart {
-  min-height: 286px;
+  min-height: 292px;
   margin: 0 24px 28px;
-  border-radius: 8px;
-  background: #fff;
-  border: 1px solid #f0f3f7;
-  overflow: hidden;
+  background: transparent;
 }
 
 .chart-plot {
   height: 238px;
+  border: 1px solid #e8edf3;
+  border-radius: 8px;
   background:
     linear-gradient(#edf0f5 1px, transparent 1px) 0 0 / 100% 47px,
     linear-gradient(90deg, #f3f5f8 1px, transparent 1px) 0 0 / 72px 100%,
     #fff;
+  overflow: hidden;
 }
 
 .chart-plot svg {
@@ -842,14 +842,14 @@ td .reason-pill {
 }
 
 .chart-legend {
-  min-height: 48px;
+  min-height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 34px;
-  padding: 13px 16px 15px;
-  border-top: 1px solid #f3f5f8;
-  background: #fff;
+  width: 100%;
+  padding: 12px 16px 0;
+  background: transparent;
 }
 
 .legend-item {
