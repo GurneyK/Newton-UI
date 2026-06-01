@@ -524,6 +524,7 @@ td .reason-pill {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fafafa;
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .stage-card.selected {
@@ -536,6 +537,24 @@ td .reason-pill {
   color: #008a45;
   border-color: #6deca4;
   background: var(--green-soft);
+}
+
+.stage-card.stage-pulse {
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.16), 0 14px 30px rgba(34, 197, 94, 0.18);
+  transform: translateY(-1px);
+  animation: stagePulse 900ms ease both;
+}
+
+@keyframes stagePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.32), 0 10px 24px rgba(34, 197, 94, 0.12);
+  }
+  55% {
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.08), 0 14px 30px rgba(34, 197, 94, 0.18);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12), 0 10px 24px rgba(34, 197, 94, 0.12);
+  }
 }
 
 .stage-icon {
@@ -784,12 +803,12 @@ td .reason-pill {
 
 .line-chart,
 .bar-chart {
-  height: 270px;
+  height: 304px;
   margin: 0 24px 28px;
   border-radius: 8px;
   background:
-    linear-gradient(#edf0f5 1px, transparent 1px) 0 0 / 100% 48px,
-    linear-gradient(90deg, #f3f5f8 1px, transparent 1px) 0 0 / 76px 100%,
+    linear-gradient(#edf0f5 1px, transparent 1px) 0 0 / 100% 47px,
+    linear-gradient(90deg, #f3f5f8 1px, transparent 1px) 0 0 / 72px 100%,
     #fff;
   border: 1px solid #f0f3f7;
 }
@@ -1056,6 +1075,11 @@ td .reason-pill {
 
 .dialog-actions .primary:not(.disabled) {
   background: var(--purple);
+}
+
+.dialog-actions .primary.disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
 }
 
 .calendar {

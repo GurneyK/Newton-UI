@@ -137,7 +137,8 @@ const state = {
   tab: "renewals",
   activeContractId: contracts[0].id,
   calendarMonth: new Date("2026-05-01T00:00:00"),
-  selectedExecutionDate: null
+  selectedExecutionDate: null,
+  recentlyExecutedId: null
 };
 
 const byId = (id) => document.getElementById(id);
@@ -307,6 +308,7 @@ function renderDetail(contract) {
   const executed = contract.status === "Executed";
   byId("negotiationStage").classList.toggle("selected", !executed);
   byId("executedStage").classList.toggle("executed", executed);
+  byId("executedStage").classList.toggle("stage-pulse", state.recentlyExecutedId === contract.id);
   byId("moveStageButton").classList.toggle("hidden", executed);
   byId("policyDate").textContent = `Policy implemented on ${longDate(contract.effectiveDate)}`;
   byId("detailScore").textContent = `${score(contract)}%`;
@@ -420,8 +422,8 @@ function renderLineChart(contract) {
   const values = monthlyOtif(contract);
   const { min, max, ticks } = chartScale(values);
   const w = 900;
-  const h = 230;
-  const pad = { left: 48, right: 20, top: 22, bottom: 40 };
+  const h = 270;
+  const pad = { left: 54, right: 36, top: 24, bottom: 76 };
   const x = (index) => pad.left + index * ((w - pad.left - pad.right) / (values.length - 1));
   const y = (value) => pad.top + (max - value) / (max - min) * (h - pad.top - pad.bottom);
   const points = values.map((value, index) => `${x(index)},${y(value)}`).join(" ");
@@ -433,11 +435,11 @@ function renderLineChart(contract) {
       <line x1="${pad.left}" y1="${y(95)}" x2="${w - pad.right}" y2="${y(95)}" stroke="#ff8a3d" stroke-width="2" stroke-dasharray="5 5" />
       <polyline points="${points}" fill="none" stroke="#4388f5" stroke-width="3" />
       ${values.map((value, index) => `<circle cx="${x(index)}" cy="${y(value)}" r="4" fill="#4388f5" />`).join("")}
-      ${labels.map((label, index) => `<text x="${x(index)}" y="207" text-anchor="middle" fill="#8a94a6" font-size="10">${label}</text>`).join("")}
+      ${labels.map((label, index) => `<text x="${x(index)}" y="229" text-anchor="middle" fill="#8a94a6" font-size="10">${label}</text>`).join("")}
       ${ticks.map((tick) => `<text x="${pad.left - 8}" y="${y(tick) + 4}" text-anchor="end" fill="#8a94a6" font-size="10">${tick}</text>`).join("")}
-      <text x="390" y="224" fill="#4388f5" font-size="11">Actual OTIF</text>
-      <text x="480" y="224" fill="#20c4d6" font-size="11">Target</text>
-      <text x="548" y="224" fill="#ff8a3d" font-size="11">Minimum</text>
+      <text x="390" y="258" fill="#4388f5" font-size="11">Actual OTIF</text>
+      <text x="486" y="258" fill="#20c4d6" font-size="11">Target</text>
+      <text x="556" y="258" fill="#ff8a3d" font-size="11">Minimum</text>
     </svg>
   `;
 }
@@ -447,9 +449,9 @@ function renderBarChart(contract) {
   const values = monthlyOtif(contract);
   const { min, max, ticks } = chartScale(values);
   const w = 900;
-  const h = 230;
-  const pad = { left: 48, right: 20, top: 22, bottom: 42 };
-  const barW = 42;
+  const h = 270;
+  const pad = { left: 54, right: 36, top: 24, bottom: 78 };
+  const barW = 40;
   const gap = (w - pad.left - pad.right) / values.length;
   const y = (value) => pad.top + (max - value) / (max - min) * (h - pad.top - pad.bottom);
   const baseline = y(min);
@@ -463,12 +465,12 @@ function renderBarChart(contract) {
         const barY = y(value);
         return `<rect x="${x}" y="${barY}" width="${barW}" height="${baseline - barY}" rx="4" fill="#4388f5" />
           <circle cx="${x + barW / 2}" cy="${barY - 8}" r="3.5" fill="#ff4a7a" />
-          <text x="${x + barW / 2}" y="207" text-anchor="middle" fill="#8a94a6" font-size="10">${labels[index]}</text>`;
+          <text x="${x + barW / 2}" y="231" text-anchor="middle" fill="#8a94a6" font-size="10">${labels[index]}</text>`;
       }).join("")}
       ${ticks.map((tick) => `<text x="${pad.left - 8}" y="${y(tick) + 4}" text-anchor="end" fill="#8a94a6" font-size="10">${tick}</text>`).join("")}
-      <text x="372" y="224" fill="#4388f5" font-size="11">OTIF</text>
-      <text x="424" y="224" fill="#20c4d6" font-size="11">Target</text>
-      <text x="488" y="224" fill="#ff8a3d" font-size="11">Minimum</text>
+      <text x="388" y="258" fill="#4388f5" font-size="11">OTIF</text>
+      <text x="442" y="258" fill="#20c4d6" font-size="11">Target</text>
+      <text x="510" y="258" fill="#ff8a3d" font-size="11">Minimum</text>
     </svg>
   `;
 }
@@ -619,7 +621,14 @@ function bindEvents() {
   });
 
   byId("contractSelect").addEventListener("change", (event) => openDetail(event.target.value));
-  byId("moveStageButton").addEventListener("click", () => byId("statusOverlay").classList.remove("hidden"));
+  byId("moveStageButton").addEventListener("click", () => {
+    state.selectedExecutionDate = null;
+    byId("selectedDateText").textContent = "Select date";
+    byId("confirmStatus").classList.add("disabled");
+    byId("calendar").classList.add("hidden");
+    byId("statusOverlay").classList.remove("hidden");
+    renderCalendar();
+  });
   byId("cancelStatus").addEventListener("click", () => byId("statusOverlay").classList.add("hidden"));
   byId("dateInput").addEventListener("click", () => byId("calendar").classList.toggle("hidden"));
   byId("prevMonth").addEventListener("click", () => {
@@ -637,7 +646,20 @@ function bindEvents() {
     byId("confirmStatus").classList.remove("disabled");
     renderCalendar();
   });
-  byId("confirmStatus").addEventListener("click", () => byId("statusOverlay").classList.add("hidden"));
+  byId("confirmStatus").addEventListener("click", () => {
+    if (!state.selectedExecutionDate) return;
+    const contract = contracts.find((item) => item.id === state.activeContractId);
+    if (!contract) return;
+    contract.status = "Executed";
+    contract.executionDate = state.selectedExecutionDate;
+    state.recentlyExecutedId = contract.id;
+    byId("statusOverlay").classList.add("hidden");
+    renderRoute();
+    window.setTimeout(() => {
+      state.recentlyExecutedId = null;
+      byId("executedStage").classList.remove("stage-pulse");
+    }, 1400);
+  });
 
   [byId("clauseButton"), byId("clauseButtonTwo"), byId("assistantButton")].forEach((button) => {
     button.addEventListener("click", () => openClauseComparison());
