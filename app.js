@@ -422,25 +422,25 @@ function renderLineChart(contract) {
   const values = monthlyOtif(contract);
   const { min, max, ticks } = chartScale(values);
   const w = 900;
-  const h = 270;
-  const pad = { left: 54, right: 36, top: 24, bottom: 76 };
+  const h = 230;
+  const pad = { left: 54, right: 36, top: 24, bottom: 42 };
   const x = (index) => pad.left + index * ((w - pad.left - pad.right) / (values.length - 1));
   const y = (value) => pad.top + (max - value) / (max - min) * (h - pad.top - pad.bottom);
   const points = values.map((value, index) => `${x(index)},${y(value)}`).join(" ");
   const target = (contract.otifMinimum || 0.95) * 100;
 
   byId("lineChart").innerHTML = `
-    <svg viewBox="0 0 ${w} ${h}" role="img">
-      <line x1="${pad.left}" y1="${y(target)}" x2="${w - pad.right}" y2="${y(target)}" stroke="#20c4d6" stroke-width="2" stroke-dasharray="5 5" />
-      <line x1="${pad.left}" y1="${y(95)}" x2="${w - pad.right}" y2="${y(95)}" stroke="#ff8a3d" stroke-width="2" stroke-dasharray="5 5" />
-      <polyline points="${points}" fill="none" stroke="#4388f5" stroke-width="3" />
-      ${values.map((value, index) => `<circle cx="${x(index)}" cy="${y(value)}" r="4" fill="#4388f5" />`).join("")}
-      ${labels.map((label, index) => `<text x="${x(index)}" y="229" text-anchor="middle" fill="#8a94a6" font-size="10">${label}</text>`).join("")}
-      ${ticks.map((tick) => `<text x="${pad.left - 8}" y="${y(tick) + 4}" text-anchor="end" fill="#8a94a6" font-size="10">${tick}</text>`).join("")}
-      <text x="390" y="258" fill="#4388f5" font-size="11">Actual OTIF</text>
-      <text x="486" y="258" fill="#20c4d6" font-size="11">Target</text>
-      <text x="556" y="258" fill="#ff8a3d" font-size="11">Minimum</text>
-    </svg>
+    <div class="chart-plot">
+      <svg viewBox="0 0 ${w} ${h}" role="img">
+        <line x1="${pad.left}" y1="${y(target)}" x2="${w - pad.right}" y2="${y(target)}" stroke="#20c4d6" stroke-width="2" stroke-dasharray="5 5" />
+        <line x1="${pad.left}" y1="${y(95)}" x2="${w - pad.right}" y2="${y(95)}" stroke="#ff8a3d" stroke-width="2" stroke-dasharray="5 5" />
+        <polyline points="${points}" fill="none" stroke="#4388f5" stroke-width="3" />
+        ${values.map((value, index) => `<circle cx="${x(index)}" cy="${y(value)}" r="4" fill="#4388f5" />`).join("")}
+        ${labels.map((label, index) => `<text x="${x(index)}" y="213" text-anchor="middle" fill="#8a94a6" font-size="10">${label}</text>`).join("")}
+        ${ticks.map((tick) => `<text x="${pad.left - 8}" y="${y(tick) + 4}" text-anchor="end" fill="#8a94a6" font-size="10">${tick}</text>`).join("")}
+      </svg>
+    </div>
+    ${chartLegend("Actual OTIF")}
   `;
 }
 
@@ -449,29 +449,39 @@ function renderBarChart(contract) {
   const values = monthlyOtif(contract);
   const { min, max, ticks } = chartScale(values);
   const w = 900;
-  const h = 270;
-  const pad = { left: 54, right: 36, top: 24, bottom: 78 };
+  const h = 230;
+  const pad = { left: 54, right: 36, top: 24, bottom: 44 };
   const barW = 40;
   const gap = (w - pad.left - pad.right) / values.length;
   const y = (value) => pad.top + (max - value) / (max - min) * (h - pad.top - pad.bottom);
   const baseline = y(min);
 
   byId("barChart").innerHTML = `
-    <svg viewBox="0 0 ${w} ${h}" role="img">
-      <line x1="${pad.left}" y1="${y(95)}" x2="${w - pad.right}" y2="${y(95)}" stroke="#ff8a3d" stroke-width="2" stroke-dasharray="5 5" />
-      <line x1="${pad.left}" y1="${y((contract.otifMinimum || 0.95) * 100)}" x2="${w - pad.right}" y2="${y((contract.otifMinimum || 0.95) * 100)}" stroke="#20c4d6" stroke-width="2" stroke-dasharray="5 5" />
-      ${values.map((value, index) => {
-        const x = pad.left + index * gap + (gap - barW) / 2;
-        const barY = y(value);
-        return `<rect x="${x}" y="${barY}" width="${barW}" height="${baseline - barY}" rx="4" fill="#4388f5" />
-          <circle cx="${x + barW / 2}" cy="${barY - 8}" r="3.5" fill="#ff4a7a" />
-          <text x="${x + barW / 2}" y="231" text-anchor="middle" fill="#8a94a6" font-size="10">${labels[index]}</text>`;
-      }).join("")}
-      ${ticks.map((tick) => `<text x="${pad.left - 8}" y="${y(tick) + 4}" text-anchor="end" fill="#8a94a6" font-size="10">${tick}</text>`).join("")}
-      <text x="388" y="258" fill="#4388f5" font-size="11">OTIF</text>
-      <text x="442" y="258" fill="#20c4d6" font-size="11">Target</text>
-      <text x="510" y="258" fill="#ff8a3d" font-size="11">Minimum</text>
-    </svg>
+    <div class="chart-plot">
+      <svg viewBox="0 0 ${w} ${h}" role="img">
+        <line x1="${pad.left}" y1="${y(95)}" x2="${w - pad.right}" y2="${y(95)}" stroke="#ff8a3d" stroke-width="2" stroke-dasharray="5 5" />
+        <line x1="${pad.left}" y1="${y((contract.otifMinimum || 0.95) * 100)}" x2="${w - pad.right}" y2="${y((contract.otifMinimum || 0.95) * 100)}" stroke="#20c4d6" stroke-width="2" stroke-dasharray="5 5" />
+        ${values.map((value, index) => {
+          const x = pad.left + index * gap + (gap - barW) / 2;
+          const barY = y(value);
+          return `<rect x="${x}" y="${barY}" width="${barW}" height="${baseline - barY}" rx="4" fill="#4388f5" />
+            <circle cx="${x + barW / 2}" cy="${barY - 8}" r="3.5" fill="#ff4a7a" />
+            <text x="${x + barW / 2}" y="213" text-anchor="middle" fill="#8a94a6" font-size="10">${labels[index]}</text>`;
+        }).join("")}
+        ${ticks.map((tick) => `<text x="${pad.left - 8}" y="${y(tick) + 4}" text-anchor="end" fill="#8a94a6" font-size="10">${tick}</text>`).join("")}
+      </svg>
+    </div>
+    ${chartLegend("OTIF")}
+  `;
+}
+
+function chartLegend(primaryLabel) {
+  return `
+    <div class="chart-legend" aria-hidden="true">
+      <span class="legend-item actual">${primaryLabel}</span>
+      <span class="legend-item target">Target</span>
+      <span class="legend-item minimum">Minimum</span>
+    </div>
   `;
 }
 
