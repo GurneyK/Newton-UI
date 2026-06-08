@@ -318,7 +318,7 @@ function renderDetail(contract) {
   byId("detailAlerts").textContent = contract.totalStrikes;
   byId("detailAlertChips").innerHTML = `
     <span class="chip blue">Renewal ${dateLabel(contract.expirationDate)}</span>
-    <span class="chip red">OTIF strikes ${contract.otifStrikes}</span>
+    <span class="chip red">OTIF Value Recovery ${contract.otifStrikes}</span>
     <span class="chip yellow">E incidents ${contract.eIncidents}</span>
   `;
   byId("recentAvg").textContent = pct(average(contract.otif));
@@ -347,9 +347,9 @@ function renderMetrics(contract) {
     ["Total Spend", money(contract.spend), "-", "Active", "Reported spend"],
     ["Supplier Avg OTIF", pct(average(contract.otif)), pct(target), average(contract.otif) >= target ? "OK" : "Below Target", "Overall performance"],
     ["Risk Score", riskLabel(contract), "Low pref.", contract.totalStrikes >= 5 ? "Action" : "Monitor", "Risk assessment"],
-    ["OTIF Strikes", contract.otifStrikes, "< 3", contract.otifStrikes < 3 ? "OK" : "Monitor", "Delivery performance misses"],
+    ["OTIF Value Recovery", contract.otifStrikes, "< 3", contract.otifStrikes < 3 ? "OK" : "Monitor", "Delivery performance misses"],
     ["E-Incidents", contract.eIncidents, "0", contract.eIncidents === 0 ? "OK" : "Action", "Compliance incidents"],
-    ["Recovery Opportunity", money(contract.recovery), "-", "Identified", "Potential savings"],
+    ["Recovery Opportunity", money(contract.recovery), "-", "Identified", "Value Recovery"],
     ["Approval Status", contract.approvalStatus, "Approved", contract.approvalStatus === "Approved" ? "OK" : "Review", "Workbook status"]
   ];
 
@@ -557,14 +557,14 @@ function renderClauses(contract) {
       impact: contract.totalStrikes >= 5 ? "High Impact" : "Medium Impact",
       saving: total * 0.46,
       current: `Average OTIF performance is ${pct(average(contract.otif))} across the reported 2025 quarters.`,
-      recommended: `Apply recovery review for ${contract.otifStrikes} OTIF strikes against ${contract.otifMinimum ? pct(contract.otifMinimum) : "95.0%"} benchmark.`
+      recommended: `Apply recovery review for ${contract.otifStrikes} OTIF Value Recovery items against ${contract.otifMinimum ? pct(contract.otifMinimum) : "95.0%"} benchmark.`
     },
     {
       title: "E-Incident Terms",
       impact: contract.eIncidents > 0 ? "High Impact" : "Medium Impact",
       saving: total * 0.22,
       current: `${contract.eIncidents} E-incidents are recorded in the source workbook.`,
-      recommended: `Escalate ${contract.eIncidentStrikes} E-incident strikes for commercial recovery review.`
+      recommended: `Escalate ${contract.eIncidentStrikes} E-incident Value Recovery items for commercial recovery review.`
     },
     {
       title: "Recovery Adjustment",
@@ -579,7 +579,7 @@ function renderClauses(contract) {
     <article class="clause-card">
       <h3>${clause.title}</h3>
       <span class="impact-pill ${clause.impact.startsWith("High") ? "high" : "medium"}">${clause.impact}</span>
-      <div class="clause-saving"><span>Potential Savings</span><strong>${money(clause.saving)}</strong></div>
+      <div class="clause-saving"><span>Value Recovery</span><strong>${money(clause.saving)}</strong></div>
       <div class="clause-row-label">Current</div>
       <div class="clause-text">${clause.current}</div>
       <div class="clause-row-label">AI Recommended</div>

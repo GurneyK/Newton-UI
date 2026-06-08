@@ -10,7 +10,7 @@ The UI replaces fake supplier-level data with workbook fields for:
 - Effective and expiration dates
 - Network, portfolio, buying category, scope, and country
 - Contract value, total spend, recovery value
-- OTIF quarter results, OTIF strikes, E-incidents, E-incident strikes, total strikes
+- OTIF quarter results, OTIF value recovery counts, E-incidents, E-incident value recovery counts, total value recovery counts
 - Approval status and source document URLs where supplied
 
 Where the workbook does not contain an exact source field, the original UI behavior and text is preserved or derived only from available contract metrics. For example, detailed incident descriptions are still sample UI rows, while their counts, severity pressure, and recovery amounts are driven by the real workbook values.
